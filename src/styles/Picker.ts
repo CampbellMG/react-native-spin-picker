@@ -1,7 +1,7 @@
 import {StyleSheet} from 'react-native';
-import {NumberPickerStyle} from "../types/NumberPicker";
+import {PickerStyle} from "../types/Picker";
 
-export const NumberPickerStyles = StyleSheet.create<NumberPickerStyle>({
+export const PickerStyles = StyleSheet.create<PickerStyle>({
     itemWrapper: {
         height:30,
         justifyContent: 'center',

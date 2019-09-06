@@ -1,11 +1,15 @@
 import React from 'react';
-import {SafeAreaView, StyleSheet} from 'react-native';
-import {NumberPicker} from "./src/components/NumberPicker";
+import {SafeAreaView, StyleSheet, Text} from 'react-native';
+import {Picker} from "./src/components/Picker";
 
 export default function App() {
     return (
         <SafeAreaView style={styles.container}>
-            <NumberPicker/>
+            <Picker data={[...Array(10).keys()]}
+                    keyExtractor={number => number.toString()}
+                    renderItem={({item}) => {
+                              return <Text style={{marginHorizontal: 64, fontSize: 32}}>{item}</Text>;
+                          }}/>
         </SafeAreaView>
     );
 }

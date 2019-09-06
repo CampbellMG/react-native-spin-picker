@@ -1,73 +1,82 @@
 import React from 'react';
-import {FlatList, NativeScrollEvent, NativeSyntheticEvent, Platform, Text, View} from 'react-native';
-import {NumberPickerItem, NumberPickerProps, NumberPickerState} from "../types/NumberPicker";
+import {FlatList, ListRenderItemInfo, NativeScrollEvent, NativeSyntheticEvent, Platform, View} from 'react-native';
+import {PickerItem, PickerProps, PickerState} from "../types/Picker";
 import {NOOP} from '../util/Functions';
 
-export class NumberPicker extends React.Component<NumberPickerProps, NumberPickerState> {
-    private ref: any;
-    private numbersGenerated: number = 0;
+export class Picker<T> extends React.Component<PickerProps<T>, PickerState> {
+    private listRef: any;
+
     private isDragScrolling: boolean;
     private isMomentumScrolling: boolean;
-    private timer: number;
     private isForceScrolling: boolean;
+
+    private timer: number;
+
     private showLength = 3;
     private readonly dataLength = 0;
     private scrollThreshold = 5;
+    private data: PickerItem[] = [];
 
-    private get numbers(): NumberPickerItem[] {
-        this.numbersGenerated++;
-        return [...Array(10).keys()]
-            .map(number => ({
-                index: this.numbersGenerated.toString() + number.toString(),
-                value: number
-            }));
-    }
-
-    constructor(props) {
+    constructor(props: PickerProps<T>) {
         super(props);
 
-        this.dataLength = this.numbers.length;
-
+        this.dataLength = props.data.length;
+        this.mapData();
         this.state = {
             height: 0
         };
     }
 
-    componentDidMount(): void {
+    componentDidUpdate(prevProps: Readonly<PickerProps<T>>, prevState: Readonly<PickerState>, snapshot?: any): void {
+        this.mapData();
+    }
+
+    private mapData() {
+        this.data = this.props.data.map(item => ({
+            index: '1-' + this.props.keyExtractor(item),
+            item: item
+        }));
+
+        this.data.push(...this.props.data.map(item => ({
+            index: '2-' + this.props.keyExtractor(item),
+            item: item
+        })));
     }
 
     render() {
         const {height} = this.state;
         return (
             <View style={{height: height * this.showLength}}>
-                <FlatList data={[...this.numbers, ...this.numbers]}
+                <FlatList data={this.data}
                           renderItem={this.getRenderItem}
-                          ref={ref => this.ref = ref}
+                          ref={ref => this.listRef = ref}
                           showsVerticalScrollIndicator={false}
                           onScrollToIndexFailed={NOOP}
                           onScroll={this.onScroll}
                           initialScrollIndex={this.dataLength - 1}
                           getItemLayout={(data, index) => ({length: height, offset: height * index, index})}
-                          keyExtractor={data => data.index}
+                          keyExtractor={(item) => item.index}
                           onMomentumScrollBegin={this.onMomentumScrollBegin}
                           onMomentumScrollEnd={this.onMomentumScrollEnd}
                           onScrollBeginDrag={this.onScrollBeginDrag}
                           onScrollEndDrag={this.onScrollEndDrag}
                           style={{flexGrow: 0}}/>
-
             </View>
         );
     }
 
-    private getRenderItem = ({item}) => (
+    private getRenderItem = (info: ListRenderItemInfo<T>) => (
         <View onLayout={event => {
             const {height} = event.nativeEvent.layout;
-            if (this.state.height != height) {
-                this.setState({height: height});
 
+            if (this.state.height != height) {
+                if (this.state.height != 0) {
+                    throw Error("Dynamic heights are not supported, please ensure all items render at the same height");
+                }
+                this.setState({height: height});
             }
         }}>
-            <Text style={{marginHorizontal: 64, fontSize: 32}}>{item.value}</Text>
+            {this.props.renderItem(info.item, info.index)}
         </View>
     );
 
@@ -75,9 +84,9 @@ export class NumberPicker extends React.Component<NumberPickerProps, NumberPicke
         const {y} = event.nativeEvent.contentOffset;
 
         if (y < this.scrollThreshold) {
-            this.ref.scrollToOffset({offset: this.dataLength * this.state.height + y});
+            this.listRef.scrollToOffset({offset: this.dataLength * this.state.height + y});
         } else if (y > ((this.dataLength * 2 - this.showLength) * this.state.height) - this.scrollThreshold) {
-            this.ref.scrollToOffset({offset: (this.dataLength - this.showLength) * this.state.height});
+            this.listRef.scrollToOffset({offset: (this.dataLength - this.showLength) * this.state.height});
         }
     };
 
@@ -90,7 +99,7 @@ export class NumberPicker extends React.Component<NumberPickerProps, NumberPicke
             this.isForceScrolling = true;
         }
 
-        this.ref.scrollToOffset({offset: newOffset});
+        this.listRef.scrollToOffset({offset: newOffset});
     };
 
     onScrollBeginDrag = () => {
