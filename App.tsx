@@ -5,7 +5,7 @@ import {Picker} from "./src/components/Picker";
 export default function App() {
     return (
         <SafeAreaView style={styles.container}>
-            <Picker data={[...Array(10).keys()]}
+            <Picker data={[...Array(100).keys()]}
                     keyExtractor={number => number.toString()}
                     renderItem={({item}) => {
                               return <Text style={{marginHorizontal: 64, fontSize: 32}}>{item}</Text>;

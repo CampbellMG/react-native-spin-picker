@@ -2,6 +2,7 @@ import React from 'react';
 import {FlatList, ListRenderItemInfo, NativeScrollEvent, NativeSyntheticEvent, Platform, View} from 'react-native';
 import {PickerItem, PickerProps, PickerState} from "../types/Picker";
 import {NOOP} from '../util/Functions';
+import Mask from './Mask';
 
 export class Picker<T> extends React.Component<PickerProps<T>, PickerState> {
     private listRef: any;
@@ -47,6 +48,7 @@ export class Picker<T> extends React.Component<PickerProps<T>, PickerState> {
         const {height} = this.state;
         return (
             <View style={{height: height * this.showLength}}>
+
                 <FlatList data={this.data}
                           renderItem={this.getRenderItem}
                           ref={ref => this.listRef = ref}
@@ -61,7 +63,12 @@ export class Picker<T> extends React.Component<PickerProps<T>, PickerState> {
                           onScrollBeginDrag={this.onScrollBeginDrag}
                           onScrollEndDrag={this.onScrollEndDrag}
                           style={{flexGrow: 0}}/>
+
+                <Mask height={height} isTop/>
+                <Mask height={height}/>
+
             </View>
+
         );
     }
 
