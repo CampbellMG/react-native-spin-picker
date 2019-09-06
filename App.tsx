@@ -1,20 +1,20 @@
 import React from 'react';
-import {StyleSheet, View} from 'react-native';
+import {SafeAreaView, StyleSheet} from 'react-native';
 import {NumberPicker} from "./src/components/NumberPicker";
 
 export default function App() {
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
             <NumberPicker/>
-        </View>
+        </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff',
         alignItems: 'center',
         justifyContent: 'center',
-    },
+        backgroundColor: '#fff'
+    }
 });

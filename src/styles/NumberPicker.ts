@@ -2,10 +2,15 @@ import {StyleSheet} from 'react-native';
 import {NumberPickerStyle} from "../types/NumberPicker";
 
 export const NumberPickerStyles = StyleSheet.create<NumberPickerStyle>({
-    container: {
-        flex: 1,
-        backgroundColor: '#fff',
-        alignItems: 'center',
+    itemWrapper: {
+        height:30,
         justifyContent: 'center',
+        alignItems: 'center',
+    },
+    itemText:{
+        color:'#999',
+    },
+    itemTextSelected:{
+        color:'#333',
     },
 });
