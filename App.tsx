@@ -1,17 +1,34 @@
 import React from 'react';
-import {SafeAreaView, StyleSheet, Text} from 'react-native';
+import {Button, SafeAreaView, StyleSheet, Text, View} from 'react-native';
 import {Picker} from "./src/components/Picker";
 
-export default function App() {
-    return (
-        <SafeAreaView style={styles.container}>
-            <Picker data={[...Array(100).keys()]}
-                    keyExtractor={number => number.toString()}
-                    renderItem={({item}) => {
-                              return <Text style={{marginHorizontal: 64, fontSize: 32}}>{item}</Text>;
-                          }}/>
-        </SafeAreaView>
-    );
+interface AppState {
+    selectedItem: number
+}
+
+export default class App extends React.Component<{}, AppState> {
+    constructor(props) {
+        super(props);
+        this.state = {
+            selectedItem: 57
+        };
+    }
+
+    render() {
+        return (
+            <SafeAreaView style={styles.container}>
+                <View>
+                <Picker data={[...Array(100).keys()]}
+                        value={this.state.selectedItem}
+                        onValueChange={value => this.setState({selectedItem: value})}
+                        keyExtractor={number => number.toString()}
+                        renderItem={({item}) => <Text
+                            style={{marginHorizontal: 64, fontSize: 32, height: 40}}>{item}</Text>}/>
+                </View>
+                <Button title='increment' onPress={() => this.setState({selectedItem: this.state.selectedItem + 1})}/>
+            </SafeAreaView>
+        );
+    }
 }
 
 const styles = StyleSheet.create({

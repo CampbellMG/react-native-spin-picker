@@ -1,8 +1,17 @@
 import React from 'react';
-import {FlatList, ListRenderItemInfo, NativeScrollEvent, NativeSyntheticEvent, Platform, View} from 'react-native';
+import {
+    FlatList,
+    ListRenderItemInfo,
+    NativeScrollEvent,
+    NativeSyntheticEvent,
+    Platform,
+    TouchableOpacity,
+    View
+} from 'react-native';
 import {PickerItem, PickerProps, PickerState} from "../types/Picker";
 import {NOOP} from '../util/Functions';
-import Mask from './Mask';
+import {Mask} from './Mask';
+import {ArrowButton} from './ArrowButton';
 
 export class Picker<T> extends React.Component<PickerProps<T>, PickerState> {
     private listRef: any;
@@ -11,25 +20,45 @@ export class Picker<T> extends React.Component<PickerProps<T>, PickerState> {
     private isMomentumScrolling: boolean;
     private isForceScrolling: boolean;
 
-    private timer: number;
+    private autoScrollTimer: number;
+    private manualScrollTimer: number;
 
     private showLength = 3;
     private readonly dataLength = 0;
     private scrollThreshold = 5;
     private data: PickerItem[] = [];
+    private scrollInterval = 50;
 
     constructor(props: PickerProps<T>) {
         super(props);
 
         this.dataLength = props.data.length;
         this.mapData();
+
         this.state = {
-            height: 0
+            height: 0,
+            selectedIndex: this.findElementIndex(props.value)
         };
     }
 
     componentDidUpdate(prevProps: Readonly<PickerProps<T>>, prevState: Readonly<PickerState>, snapshot?: any): void {
         this.mapData();
+        const {value, keyExtractor} = this.props;
+        if (keyExtractor(value) !== keyExtractor(prevProps.value)) {
+            this.scrollToIndex(this.findElementIndex(value));
+        }
+    }
+
+    private findElementIndex(element: T): number {
+        const {keyExtractor} = this.props;
+        for (let i = 0; i < this.data.length; i++) {
+            if (keyExtractor(this.data[i].item) === keyExtractor(element)) {
+                if (i == 0) {
+                    return this.dataLength - 1;
+                }
+                return i - 1;
+            }
+        }
     }
 
     private mapData() {
@@ -45,8 +74,8 @@ export class Picker<T> extends React.Component<PickerProps<T>, PickerState> {
     }
 
     render() {
-        const {height} = this.state;
-        return (
+        const {height, showArrows, selectedIndex} = {...this.state, ...this.props};
+        const list = (
             <View style={{height: height * this.showLength}}>
 
                 <FlatList data={this.data}
@@ -55,7 +84,7 @@ export class Picker<T> extends React.Component<PickerProps<T>, PickerState> {
                           showsVerticalScrollIndicator={false}
                           onScrollToIndexFailed={NOOP}
                           onScroll={this.onScroll}
-                          initialScrollIndex={this.dataLength - 1}
+                          initialScrollIndex={selectedIndex}
                           getItemLayout={(data, index) => ({length: height, offset: height * index, index})}
                           keyExtractor={(item) => item.index}
                           onMomentumScrollBegin={this.onMomentumScrollBegin}
@@ -68,12 +97,32 @@ export class Picker<T> extends React.Component<PickerProps<T>, PickerState> {
                 <Mask height={height}/>
 
             </View>
-
         );
+
+        if (showArrows) {
+            return (
+                <View>
+                    <ArrowButton height={height}
+                                 onPress={this.onDecrementIndex}
+                                 onLongPress={this.onStartDecrementScroll}
+                                 onLift={this.onEndScroll}
+                                 {...this.props}/>
+                    {list}
+                    <ArrowButton isPointingDown
+                                 height={height}
+                                 onPress={this.onIncrementIndex}
+                                 onLongPress={this.onStartIncrementScroll}
+                                 onLift={this.onEndScroll}
+                                 {...this.props}/>
+                </View>
+            );
+        }
+
+        return list;
     }
 
     private getRenderItem = (info: ListRenderItemInfo<T>) => (
-        <View onLayout={event => {
+        <TouchableOpacity onLayout={event => {
             const {height} = event.nativeEvent.layout;
 
             if (this.state.height != height) {
@@ -84,7 +133,7 @@ export class Picker<T> extends React.Component<PickerProps<T>, PickerState> {
             }
         }}>
             {this.props.renderItem(info.item, info.index)}
-        </View>
+        </TouchableOpacity>
     );
 
     private onScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -97,6 +146,34 @@ export class Picker<T> extends React.Component<PickerProps<T>, PickerState> {
         }
     };
 
+    private onStartIncrementScroll = () => this.manualScrollTimer = setInterval(this.onIncrementIndex, this.scrollInterval);
+    private onStartDecrementScroll = () => this.manualScrollTimer = setInterval(this.onDecrementIndex, this.scrollInterval);
+
+    private onEndScroll = () => clearInterval(this.manualScrollTimer);
+
+    private onIncrementIndex = () => this.scrollToIndex(this.state.selectedIndex + 1);
+    private onDecrementIndex = () => this.scrollToIndex(this.state.selectedIndex - 1);
+
+    private scrollToIndex(selectedIndex: number) {
+        let {height} = this.state;
+
+        // Scroll to equivalent on duplicated list without animation before continuing
+        if (selectedIndex < 1) {
+            const offset = (this.dataLength + 1) * height;
+            this.listRef.scrollToOffset({offset, animated: false});
+            selectedIndex = this.dataLength;
+        } else if (selectedIndex === this.dataLength * 2 - (this.showLength - 1)) {
+            const offset = (this.dataLength - this.showLength) * height;
+            this.listRef.scrollToOffset({offset, animated: false});
+            selectedIndex = this.dataLength - this.showLength + 1;
+        }
+
+        const offset = selectedIndex * height;
+
+        this.onIndexChanged(selectedIndex);
+        this.listRef.scrollToOffset({offset});
+    }
+
     private scrollToNearestElement = (verticalOffset) => {
         let {height} = this.state;
         let selectedIndex = Math.round(verticalOffset / height);
@@ -106,6 +183,7 @@ export class Picker<T> extends React.Component<PickerProps<T>, PickerState> {
             this.isForceScrolling = true;
         }
 
+        this.onIndexChanged(selectedIndex);
         this.listRef.scrollToOffset({offset: newOffset});
     };
 
@@ -114,13 +192,13 @@ export class Picker<T> extends React.Component<PickerProps<T>, PickerState> {
         if (Platform.OS === 'ios') {
             this.isForceScrolling = false;
         }
-        this.timer && clearTimeout(this.timer);
+        this.autoScrollTimer && clearTimeout(this.autoScrollTimer);
     };
 
     onScrollEndDrag = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
         this.isDragScrolling = false;
-        this.timer && clearTimeout(this.timer);
-        this.timer = setTimeout(
+        this.autoScrollTimer && clearTimeout(this.autoScrollTimer);
+        this.autoScrollTimer = setTimeout(
             () => {
                 if (!this.isMomentumScrolling && !this.isDragScrolling) {
                     this.scrollToNearestElement(event.nativeEvent.contentOffset.y);
@@ -132,7 +210,7 @@ export class Picker<T> extends React.Component<PickerProps<T>, PickerState> {
 
     onMomentumScrollBegin = () => {
         this.isMomentumScrolling = true;
-        this.timer && clearTimeout(this.timer);
+        this.autoScrollTimer && clearTimeout(this.autoScrollTimer);
     };
 
     onMomentumScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -141,7 +219,9 @@ export class Picker<T> extends React.Component<PickerProps<T>, PickerState> {
             this.scrollToNearestElement(event.nativeEvent.contentOffset.y);
         }
     };
+
+    private onIndexChanged(selectedIndex: number) {
+        this.setState({selectedIndex});
+        this.props.onValueChange(this.data[selectedIndex + 1].item);
+    }
 }
-
-
-
