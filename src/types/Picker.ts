@@ -1,4 +1,4 @@
-import {TextInputProps, TextStyle, ViewStyle} from "react-native";
+import {TextInputProps, TextStyle} from "react-native";
 import React from 'react';
 import {ExternalArrowButtonProps} from './ArrowButton';
 
@@ -24,11 +24,4 @@ export interface PickerState {
     selectedIndex: number
     isTyping: boolean
     inputValue: string
-}
-
-export interface PickerStyle {
-    itemWrapper: ViewStyle,
-    itemText: ViewStyle,
-    itemTextSelected: ViewStyle,
-    textInput: TextStyle
 }

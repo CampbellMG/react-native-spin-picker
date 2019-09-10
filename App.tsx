@@ -26,7 +26,7 @@ export default class App extends React.Component<{}, AppState> {
                             onInputValueChanged={this.onValueChanged}
                             textInputProps={{}}
                             textInputStyle={{fontSize: 32}}
-                            renderItem={({item}) => <Text
+                            renderItem={item => <Text
                                 style={{marginHorizontal: 64, fontSize: 32, height: 40, textAlign: 'center'}}>{item}</Text>}/>
                 </View>
                 <Button title='increment' onPress={() => this.setState({selectedItem: this.state.selectedItem + 1})}/>
