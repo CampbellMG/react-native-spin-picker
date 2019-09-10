@@ -16,7 +16,8 @@ export const ArrowButton: React.FunctionComponent<ArrowButtonProps> =
         borderRightColor: 'transparent',
         borderBottomColor: 'grey',
         alignSelf: 'center',
-        marginBottom: 8,
+        marginBottom: isPointingDown ? 0 : 8,
+        marginTop: isPointingDown ? 8 : 0,
         transform: isPointingDown ? [{rotate: '180deg'}] : [],
         ...arrowStyle
     };

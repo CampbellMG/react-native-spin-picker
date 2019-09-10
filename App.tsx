@@ -18,17 +18,31 @@ export default class App extends React.Component<{}, AppState> {
         return (
             <SafeAreaView style={styles.container}>
                 <View>
-                <Picker data={[...Array(100).keys()]}
-                        value={this.state.selectedItem}
-                        onValueChange={value => this.setState({selectedItem: value})}
-                        keyExtractor={number => number.toString()}
-                        renderItem={({item}) => <Text
-                            style={{marginHorizontal: 64, fontSize: 32, height: 40}}>{item}</Text>}/>
+                    <Picker data={[...Array(100).keys()]}
+                            value={this.state.selectedItem}
+                            onValueChange={value => this.setState({selectedItem: value})}
+                            keyExtractor={number => number.toString()}
+                            showArrows
+                            onInputValueChanged={this.onValueChanged}
+                            textInputProps={{}}
+                            textInputStyle={{fontSize: 32}}
+                            renderItem={({item}) => <Text
+                                style={{marginHorizontal: 64, fontSize: 32, height: 40, textAlign: 'center'}}>{item}</Text>}/>
                 </View>
                 <Button title='increment' onPress={() => this.setState({selectedItem: this.state.selectedItem + 1})}/>
             </SafeAreaView>
         );
     }
+
+    private onValueChanged = (value: string, previousValue: string): string => {
+        const numberValue = Number(value);
+        if (!isNaN(numberValue) && numberValue < 100) {
+            this.setState({selectedItem: numberValue})
+            return value;
+        }
+
+        return previousValue;
+    };
 }
 
 const styles = StyleSheet.create({

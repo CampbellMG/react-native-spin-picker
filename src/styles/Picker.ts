@@ -13,4 +13,14 @@ export const PickerStyles = StyleSheet.create<PickerStyle>({
     itemTextSelected:{
         color:'#333',
     },
+    textInput:{
+        height: this.state.height,
+        position: 'absolute',
+        top: height,
+        bottom: height,
+        left: 0,
+        right: 0,
+        textAlign: 'center',
+        backgroundColor: 'white',
+    }
 });

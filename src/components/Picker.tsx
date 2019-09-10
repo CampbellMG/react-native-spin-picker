@@ -1,6 +1,7 @@
 import React from 'react';
 import {
     FlatList,
+    LayoutChangeEvent,
     ListRenderItemInfo,
     NativeScrollEvent,
     NativeSyntheticEvent,
@@ -12,6 +13,7 @@ import {PickerItem, PickerProps, PickerState} from "../types/Picker";
 import {NOOP} from '../util/Functions';
 import {Mask} from './Mask';
 import {ArrowButton} from './ArrowButton';
+import {FloatingInput} from './FloatingInput';
 
 export class Picker<T> extends React.Component<PickerProps<T>, PickerState> {
     private listRef: any;
@@ -23,10 +25,11 @@ export class Picker<T> extends React.Component<PickerProps<T>, PickerState> {
     private autoScrollTimer: number;
     private manualScrollTimer: number;
 
-    private showLength = 3;
     private readonly dataLength = 0;
-    private scrollThreshold = 5;
     private data: PickerItem[] = [];
+
+    private showLength = 3;
+    private scrollThreshold = 5;
     private scrollInterval = 50;
 
     constructor(props: PickerProps<T>) {
@@ -37,7 +40,9 @@ export class Picker<T> extends React.Component<PickerProps<T>, PickerState> {
 
         this.state = {
             height: 0,
-            selectedIndex: this.findElementIndex(props.value)
+            selectedIndex: this.findElementIndex(props.value),
+            isTyping: false,
+            inputValue: ''
         };
     }
 
@@ -74,7 +79,7 @@ export class Picker<T> extends React.Component<PickerProps<T>, PickerState> {
     }
 
     render() {
-        const {height, showArrows, selectedIndex} = {...this.state, ...this.props};
+        const {height, showArrows, selectedIndex, isTyping, textInputProps, textInputStyle} = {...this.state, ...this.props};
         const list = (
             <View style={{height: height * this.showLength}}>
 
@@ -92,6 +97,14 @@ export class Picker<T> extends React.Component<PickerProps<T>, PickerState> {
                           onScrollBeginDrag={this.onScrollBeginDrag}
                           onScrollEndDrag={this.onScrollEndDrag}
                           style={{flexGrow: 0}}/>
+
+                <FloatingInput height={height}
+                               visible={isTyping}
+                               style={textInputStyle}
+                               onSubmitEditing={() => this.setState({isTyping: false})}
+                               value={this.state.inputValue}
+                               onChangeText={this.onInputValueChanged}
+                               {...textInputProps}/>
 
                 <Mask height={height} isTop/>
                 <Mask height={height}/>
@@ -121,20 +134,36 @@ export class Picker<T> extends React.Component<PickerProps<T>, PickerState> {
         return list;
     }
 
-    private getRenderItem = (info: ListRenderItemInfo<T>) => (
-        <TouchableOpacity onLayout={event => {
-            const {height} = event.nativeEvent.layout;
+    private getRenderItem = (info: ListRenderItemInfo<T>) => {
+        return (
+            <TouchableOpacity onLayout={this.onListItemLayout}
+                              onPress={() => this.onListItemClick(info)}>
+                {this.props.renderItem(info.item, info.index)}
+            </TouchableOpacity>
+        );
+    };
 
-            if (this.state.height != height) {
-                if (this.state.height != 0) {
-                    throw Error("Dynamic heights are not supported, please ensure all items render at the same height");
-                }
-                this.setState({height: height});
+    private onInputValueChanged = (value: string) => {
+        const inputValue = this.props.onInputValueChanged(value, this.state.inputValue);
+        this.setState({inputValue});
+    };
+
+    private onListItemClick(info: ListRenderItemInfo<T>) {
+        if (this.props.onInputValueChanged && info.index === this.state.selectedIndex + 1) {
+            this.setState({isTyping: true});
+        }
+    }
+
+    private onListItemLayout = (event: LayoutChangeEvent) => {
+        const {height} = event.nativeEvent.layout;
+
+        if (this.state.height != height) {
+            if (this.state.height != 0) {
+                console.warn("Dynamic heights are not supported, if you are experiencing issues set a fixed height in renderItem");
             }
-        }}>
-            {this.props.renderItem(info.item, info.index)}
-        </TouchableOpacity>
-    );
+            this.setState({height: height});
+        }
+    };
 
     private onScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
         const {y} = event.nativeEvent.contentOffset;
@@ -155,7 +184,7 @@ export class Picker<T> extends React.Component<PickerProps<T>, PickerState> {
     private onDecrementIndex = () => this.scrollToIndex(this.state.selectedIndex - 1);
 
     private scrollToIndex(selectedIndex: number) {
-        let {height} = this.state;
+        let {height, isTyping} = this.state;
 
         // Scroll to equivalent on duplicated list without animation before continuing
         if (selectedIndex < 1) {
@@ -171,7 +200,7 @@ export class Picker<T> extends React.Component<PickerProps<T>, PickerState> {
         const offset = selectedIndex * height;
 
         this.onIndexChanged(selectedIndex);
-        this.listRef.scrollToOffset({offset});
+        this.listRef.scrollToOffset({offset, animated: !isTyping});
     }
 
     private scrollToNearestElement = (verticalOffset) => {
