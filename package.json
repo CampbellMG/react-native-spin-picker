@@ -1,27 +1,39 @@
 {
-  "main": "node_modules/expo/AppEntry.js",
+  "name": "react-native-spin-picker",
+  "version": "0.0.1",
+  "description": "A simple picker for React Native",
+  "main": "lib/index.js",
+  "types": "src/types/index.d.ts",
   "scripts": {
-    "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web",
-    "eject": "expo eject"
+    "build": "tsc",
+    "prepare": "npm run build",
+    "version": "git add -A src",
+    "postversion": "git push && git push --tags"
   },
-  "dependencies": {
-    "expo": "^34.0.1",
-    "react": "16.8.3",
-    "react-dom": "^16.8.6",
-    "react-native": "https://github.com/expo/react-native/archive/sdk-34.0.0.tar.gz",
-    "react-native-select-picker": "0.0.3",
-    "react-native-smooth-picker": "^0.2.4",
-    "react-native-web": "^0.11.4",
-    "react-native-wheel-scroll-picker": "^0.2.4"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CampbellMG/react-native-picker.git"
   },
+  "keywords": [
+    "expo",
+    "react native",
+    "picker",
+    "select"
+  ],
+  "author": "CampbellMG",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/CampbellMG/react-native-picker/issues"
+  },
+  "homepage": "https://github.com/CampbellMG/react-native-picker",
   "devDependencies": {
     "@types/react": "^16.8.23",
     "@types/react-native": "^0.57.65",
-    "babel-preset-expo": "^6.0.0",
+    "react": "16.8.3",
+    "react-native": "https://github.com/expo/react-native/archive/sdk-34.0.0.tar.gz",
     "typescript": "^3.4.5"
   },
-  "private": true
+  "files": [
+    "lib/**/*"
+  ]
 }

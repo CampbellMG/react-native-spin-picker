@@ -1,6 +1,6 @@
 import {TextInput, TextStyle, View} from 'react-native';
 import React from 'react';
-import {FloatingInputProps} from '../types/FloatingInput';
+import {FloatingInputProps} from '../types';
 
 export const FloatingInput: React.FunctionComponent<FloatingInputProps> = props => {
     if (!props.visible) return <View/>;

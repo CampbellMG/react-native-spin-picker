@@ -1,6 +1,30 @@
-import {TextInputProps, TextStyle} from "react-native";
+import {TextInputProps, TextStyle, ViewStyle} from 'react-native';
 import React from 'react';
 import {ExternalArrowButtonProps} from './ArrowButton';
+
+export interface ExternalArrowButtonProps {
+    arrowStyle?: ViewStyle
+}
+
+export interface ArrowButtonOwnProps {
+    height: number
+    onPress?: () => void
+    onLongPress?: () => void
+    onLift?: () => void
+    isPointingDown?: boolean
+}
+
+export type ArrowButtonProps = ArrowButtonOwnProps & ExternalArrowButtonProps
+
+export interface FloatingInputProps extends TextInputProps {
+    height: number
+    visible: boolean
+}
+
+export interface MaskProps {
+    height: number
+    isTop?: boolean
+}
 
 export interface PickerItem<T> {
     index: string

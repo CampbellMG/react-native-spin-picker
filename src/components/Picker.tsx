@@ -10,21 +10,21 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
-import {PickerItem, PickerProps, PickerState} from "../types/Picker";
 import {NOOP} from '../util/Functions';
 import {Mask} from './Mask';
 import {ArrowButton} from './ArrowButton';
 import {FloatingInput} from './FloatingInput';
+import {PickerItem, PickerProps, PickerState} from '../types';
 
 export class Picker<T> extends React.Component<PickerProps<T>, PickerState> {
     private listRef: any;
 
-    private isDragScrolling: boolean;
-    private isMomentumScrolling: boolean;
-    private isForceScrolling: boolean;
+    private isDragScrolling: boolean = false;
+    private isMomentumScrolling: boolean = false;
+    private isForceScrolling: boolean = false;
 
-    private autoScrollTimer: number;
-    private manualScrollTimer: number;
+    private autoScrollTimer: number = 0;
+    private manualScrollTimer: number = 0;
 
     private readonly dataLength: number;
     private data: PickerItem<T>[] = [];
@@ -65,6 +65,8 @@ export class Picker<T> extends React.Component<PickerProps<T>, PickerState> {
                 return i - 1;
             }
         }
+
+        return -1;
     }
 
     private mapData() {
@@ -156,8 +158,11 @@ export class Picker<T> extends React.Component<PickerProps<T>, PickerState> {
     };
 
     private onInputValueChanged = (value: string) => {
-        const inputValue = this.props.onInputValueChanged(value, this.state.inputValue);
-        this.setState({inputValue});
+        const {onInputValueChanged} = this.props;
+        if (onInputValueChanged) {
+            const inputValue = onInputValueChanged(value, this.state.inputValue);
+            this.setState({inputValue});
+        }
     };
 
     private onListItemClick(info: ListRenderItemInfo<PickerItem<T>>) {
@@ -180,6 +185,8 @@ export class Picker<T> extends React.Component<PickerProps<T>, PickerState> {
     }
 
     private scrollToIndex(selectedIndex: number) {
+        if (selectedIndex < 0) return;
+
         let {height, isTyping} = this.state;
 
         // Scroll to equivalent on duplicated list without animation before continuing
@@ -209,7 +216,7 @@ export class Picker<T> extends React.Component<PickerProps<T>, PickerState> {
         }
     };
 
-    private scrollToNearestElement = (verticalOffset) => {
+    private scrollToNearestElement = (verticalOffset: number) => {
         let {height} = this.state;
         let selectedIndex = Math.round(verticalOffset / height);
         let newOffset = selectedIndex * height;
