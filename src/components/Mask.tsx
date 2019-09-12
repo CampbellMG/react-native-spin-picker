@@ -1,6 +1,6 @@
 import {StyleSheet, View, ViewStyle} from 'react-native';
 import React from 'react';
-import {MaskProps} from '../types';
+import {MaskProps} from '../types/Mask';
 
 export const Mask: React.FunctionComponent<MaskProps> = ({height, isTop}) => {
     const style: ViewStyle = {

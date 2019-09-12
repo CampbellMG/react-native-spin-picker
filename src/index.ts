@@ -1,3 +1,1 @@
-import {Picker} from './components/Picker';
-
-export default Picker;
+export {SpinPicker} from './components/SpinPicker';

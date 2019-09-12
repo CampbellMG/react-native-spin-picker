@@ -1,9 +1,9 @@
 {
   "name": "react-native-spin-picker",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A simple picker for React Native",
   "main": "lib/index.js",
-  "types": "src/types/index.d.ts",
+  "types": "src/index.d.ts",
   "scripts": {
     "build": "tsc",
     "prepare": "npm run build",
@@ -34,6 +34,8 @@
     "typescript": "^3.4.5"
   },
   "files": [
-    "lib/**/*"
+    "lib/**/*",
+    "src/index.d.ts",
+    "src/types"
   ]
 }

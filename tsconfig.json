@@ -10,7 +10,6 @@
     "sourceRoot": "src",
     "inlineSourceMap": true,
     "outDir": "lib",
-    "declaration": true,
     "strict": true
   },
   "include": ["src"],

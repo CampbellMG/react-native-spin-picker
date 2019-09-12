@@ -14,9 +14,9 @@ import {NOOP} from '../util/Functions';
 import {Mask} from './Mask';
 import {ArrowButton} from './ArrowButton';
 import {FloatingInput} from './FloatingInput';
-import {PickerItem, PickerProps, PickerState} from '../types';
+import {SpinPickerItem, SpinPickerProps, SpinPickerState} from '../types/SpinPicker';
 
-export class Picker<T> extends React.Component<PickerProps<T>, PickerState> {
+export class SpinPicker<T> extends React.Component<SpinPickerProps<T>, SpinPickerState> {
     private listRef: any;
 
     private isDragScrolling: boolean = false;
@@ -27,13 +27,13 @@ export class Picker<T> extends React.Component<PickerProps<T>, PickerState> {
     private manualScrollTimer: number = 0;
 
     private readonly dataLength: number;
-    private data: PickerItem<T>[] = [];
+    private data: SpinPickerItem<T>[] = [];
 
     private showLength = 3;
     private scrollThreshold = 5;
     private scrollInterval = 50;
 
-    constructor(props: PickerProps<T>) {
+    constructor(props: SpinPickerProps<T>) {
         super(props);
 
         this.dataLength = props.data.length;
@@ -47,7 +47,7 @@ export class Picker<T> extends React.Component<PickerProps<T>, PickerState> {
         };
     }
 
-    componentDidUpdate(prevProps: Readonly<PickerProps<T>>): void {
+    componentDidUpdate(prevProps: Readonly<SpinPickerProps<T>>): void {
         this.mapData();
         const {value, keyExtractor} = this.props;
         if (keyExtractor(value) !== keyExtractor(prevProps.value)) {
@@ -148,7 +148,7 @@ export class Picker<T> extends React.Component<PickerProps<T>, PickerState> {
         }
     };
 
-    private getRenderItem: ListRenderItem<PickerItem<T>> = info => {
+    private getRenderItem: ListRenderItem<SpinPickerItem<T>> = info => {
         return (
             <TouchableOpacity onLayout={this.onListItemLayout}
                               onPress={() => this.onListItemClick(info)}>
@@ -165,7 +165,7 @@ export class Picker<T> extends React.Component<PickerProps<T>, PickerState> {
         }
     };
 
-    private onListItemClick(info: ListRenderItemInfo<PickerItem<T>>) {
+    private onListItemClick(info: ListRenderItemInfo<SpinPickerItem<T>>) {
         if (this.props.onInputValueChanged && info.index === this.state.selectedIndex + 1) {
             this.setState({isTyping: true});
         }

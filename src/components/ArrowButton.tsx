@@ -1,6 +1,6 @@
 import {TouchableOpacity, ViewStyle} from 'react-native';
 import React from 'react';
-import {ArrowButtonProps} from '../types';
+import {ArrowButtonProps} from '../types/ArrowButton';
 
 export const ArrowButton: React.FunctionComponent<ArrowButtonProps> =
     ({isPointingDown, height, onPress, onLongPress, onLift, arrowStyle}) => {
